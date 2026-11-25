@@ -2,6 +2,7 @@ package com.latihan.mobilelanjut.catalog.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -17,8 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
-    // KUSTOMISASI WAJIB: Palet warna tema sendiri (Biru Indigo)
-    val accent = Color(0xFF4F46E5)
+    // KUSTOMISASI: Palet Warna Merah Marun
+    val accent = Color(0xFF9F1239)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val snackHost = remember { SnackbarHostState() }
 
@@ -32,7 +33,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackHost) },
-        containerColor = Color(0xFFF8FAFC)
+        containerColor = Color(0xFFFFF1F2)
     ) { pad ->
         Column(
             modifier = Modifier
@@ -41,7 +42,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Kartu Identitas & Badge Keranjang
+            // 1. Kartu Identitas Mahasiswa & Badge Keranjang
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = accent)
@@ -60,7 +61,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Katalog Buku IT Reaktif",
+                            text = "Haikal Coffee & Bites",
                             color = Color.White.copy(alpha = 0.85f),
                             fontSize = 12.sp
                         )
@@ -79,7 +80,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                 }
             }
 
-            // Kolom Pencarian + Tombol Reset Keranjang
+            // 2. Kolom Pencarian + Tombol Reset Keranjang
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -88,7 +89,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = vm::onQueryChange,
-                    label = { Text("Cari buku atau kategori...") },
+                    label = { Text("Cari menu...") },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.weight(1f),
                     singleLine = true
@@ -102,7 +103,23 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                 }
             }
 
-            // Status Layar (Loading, Empty, Success)
+            // 3. Filter Kategori (Terhubung ke ViewModel)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(vm.categories) { category ->
+                    val isSelected = state.selectedCategory == category
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { vm.onCategorySelect(category) },
+                        label = { Text(category) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = accent,
+                            selectedLabelColor = Color.White
+                        )
+                    )
+                }
+            }
+
+            // 4. Daftar Produk (Loading / Empty / Success)
             when (val content = state.content) {
                 CatalogContentState.Loading -> Box(
                     modifier = Modifier
@@ -114,7 +131,7 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                 }
 
                 CatalogContentState.Empty -> Text(
-                    text = "Produk tidak ditemukan.",
+                    text = "Menu tidak ditemukan.",
                     color = Color.Gray
                 )
 
@@ -124,7 +141,8 @@ fun CatalogScreen(vm: CatalogViewModel = viewModel()) {
                     items(content.items, key = { it.id }) { item ->
                         ElevatedCard(
                             shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
                         ) {
                             Row(
                                 modifier = Modifier.padding(14.dp),
